@@ -1,0 +1,2 @@
+import "./clap-it.svelte"
+
