@@ -3,8 +3,8 @@
 import { onMount, tick } from 'svelte';
 import { writable } from 'svelte/store';
 
-const count = writable(0);
-let counter = 0;
+
+let countValue = 0;
 let currentClass = "";
 let timeout = null;
 let incTimeout = null;
@@ -12,23 +12,32 @@ let bufferedCount = 0;
 export let api;
 export let style;
 
+//Assigning writable store 
+const counter = writable(0);
+
 onMount(async () => {
-  //Prop initialization in web/standalone components https://github.com/sveltejs/svelte/issues/2227 
+  //Waiting for any pending state changes to be applied to the DOM
   await tick()
-  const res = await fetch( api + `/` +  `?url=` + window.location.href );
+  //GET HTTP API Request based on current url location 
+  const res = await fetch( api +  `?url=` + window.location.href );
   var initial = await res.text();
-  count.update(n => parseInt(initial,10));
+  //Update store initial value based on API response
+  counter.update(n => parseInt(initial,10));
 });
 
+//POST HTTP API Request handler
 const httpPost = (api, claps, url) =>
-  fetch(`${api}/` + (url ? `?url=${url}` : ""), {
+  fetch(`${api}` + (url ? `?url=${url}` : ""), {
     method: "POST",
     body: claps
   }).then(response => response.text());
 
+//Increment store with interval, based on on:mousedown event
+//Update counter and buffered count per 200ms until on:mouseup event triggered
+//Add clapped effect to svg when increment happened
 function increment() {
   addClass("clapped clap", 250)
-    count.update(n => {
+    counter.update(n => {
       bufferedCount++
       return n + 1
     });
@@ -44,14 +53,16 @@ function addClass(val = "", t = 0) {
   }
 }
 
-const unsubscribe = count.subscribe(value => {
-	counter = value;	
+//The store will notify the counter whenever the store value changes.
+const unsubscribe = counter.subscribe(value => {
+  countValue = value;	
+  //if there is no changes within 1.5sec, then send the bufferedCount to API
 	if (bufferedCount != 0) {
 		clearTimeout(timeout);
     timeout = setTimeout(() => {
       httpPost(api,bufferedCount, window.location.href)
       bufferedCount = 0;
- 		}, 1000);
+ 		}, 1500);
   }
 });
 </script>
@@ -61,7 +72,7 @@ const unsubscribe = count.subscribe(value => {
 
 <div id="clap-container" class="{currentClass}" style="{style}">
   <div class="count-container">
-    <div class="count">{counter}</div>
+    <div class="count">{countValue}</div>
   </div>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" on:mousedown={increment} on:mouseup="{clearTimeout(incTimeout)}">
     <g class="outline">
