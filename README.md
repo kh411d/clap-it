@@ -1,6 +1,6 @@
 # Clap-it (Frontend)
 
-a medium-like Clap button made with [Svelte](https://svelte.dev/) custom web component
+a medium-like Clap button/WebComponent made with [Svelte](https://svelte.dev/) custom element API
 
 ### Install
 
