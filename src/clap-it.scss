@@ -7,11 +7,7 @@
   #clap-container {
     position: relative;
     cursor:pointer;
-  
-    &.loading {
-      opacity: 0.5;
-    }
-  
+    
     svg {
       position: absolute;
       top: 0;
@@ -68,9 +64,9 @@
       }
   
       @include animate-once(pulse);
-  
+     
       .count {
-        @include animate-once(hideThenShow);
+        @include animate-once(blinkin);
       }
     }
   }
@@ -96,7 +92,7 @@
     20% {
       transform: scale(1.1);
       opacity: 1;
-      transform: translateY(3px);
+      transform: translateY(8px);
     }
     50% {
       transform: scale(1.3);
@@ -111,26 +107,15 @@
       transform: translateX(-6px);
     }
   }
-  
-  @keyframes hideThenShow {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    20% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    50% {
-      transform: translateY(10px);
-    }
-    80% {
-      transform: translateY(10px);
-      opacity: 0;
-    }
+
+  @keyframes blinkin {
+    0%,
+    50%,
     100% {
       opacity: 1;
-      transform: translateY(0);
+    }
+    25%,
+    75% {
+      opacity: 0;
     }
   }
-  

@@ -1,11 +1,11 @@
-<svelte:options tag="clap-it"/>
+<svelte:options tag="clap-it" />
 <script>
 import { onMount, tick } from 'svelte';
 import { writable } from 'svelte/store';
 
 const count = writable(0);
-let count_value;
-let clapClass;
+let counter = 0;
+let currentClass = "";
 var timeout = null;
 var intervalTime = null;
 var bufferedCount = 0;
@@ -14,24 +14,21 @@ export let api;
 export let style;
 
 onMount(async () => {
-  toggleClass("loading")
   //Prop initialization in web/standalone components https://github.com/sveltejs/svelte/issues/2227 
   await tick()
   const res = await fetch( api + `/` +  `?url=` + window.location.href );
   var initial = await res.text();
   count.update(n => parseInt(initial,10));
-  toggleClass()
 });
 
-const updateClaps = (api, claps, url) =>
+const httpPost = (api, claps, url) =>
   fetch(`${api}/` + (url ? `?url=${url}` : ""), {
     method: "POST",
     body: claps
   }).then(response => response.text());
 
-
 function increment() {
-    toggleClass("clapped clap", 250)
+  addClass("clapped clap", 250)
     count.update(n => {
       bufferedCount++
       return n + 1
@@ -43,21 +40,21 @@ function clearIncrement() {
   clearTimeout(intervalTime)
 }
 
-function toggleClass(val = "", t = 0) {
-  clapClass = val
+function addClass(val = "", t = 0) {
+  currentClass = val;
   if (t > 0) {
     setTimeout(() => {
-      clapClass = ""      
+      currentClass = "";
     }, t); 
   }
 }
 
 const unsubscribe = count.subscribe(value => {
-	count_value = value;	
+	counter = value;	
 	if (bufferedCount != 0) {
 		clearTimeout(timeout);
     timeout = setTimeout(() => {
-      updateClaps(api,bufferedCount, window.location.href)
+      httpPost(api,bufferedCount, window.location.href)
       bufferedCount = 0;
  		}, 1000);
   }
@@ -67,9 +64,9 @@ const unsubscribe = count.subscribe(value => {
   @import './clap-it.scss';
 </style>
 
-<div id="clap-container" class="{clapClass}" style="{style}">
+<div id="clap-container" class="{currentClass}" style="{style}">
   <div class="count-container">
-    <div class="count">{count_value}</div>
+    <div class="count">{counter}</div>
   </div>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" on:mousedown={increment} on:mouseup="{clearIncrement}">
     <g class="outline">
