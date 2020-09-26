@@ -1,6 +1,6 @@
 <svelte:options tag="clap-it" />
 <script>
-import { onMount, tick } from 'svelte';
+import { onMount } from 'svelte';
 import { writable } from 'svelte/store';
 
 
@@ -15,14 +15,15 @@ export let style;
 //Assigning writable store 
 const counter = writable(0);
 
-onMount(async () => {
+onMount(() => {
   //Waiting for any pending state changes to be applied to the DOM
-  await tick()
-  //GET HTTP API Request based on current url location 
-  const res = await fetch( api +  `?url=` + window.location.href );
-  var initial = await res.text();
-  //Update store initial value based on API response
-  counter.update(n => parseInt(initial,10));
+  setTimeout(async ()=> {
+    //GET HTTP API Request based on current url location 
+    const res = await fetch( api +  `?url=` + window.location.href );
+    var initial = await res.text();
+    //Update store initial value based on API response
+    counter.update(n => parseInt(initial,10));
+  }, 0)
 });
 
 //POST HTTP API Request handler
